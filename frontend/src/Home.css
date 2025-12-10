@@ -1,0 +1,48 @@
+.LandingPageDiv {
+    background-image: url("https://www.shutterstock.com/image-vector/abstract-blue-background-modern-simple-600nw-2474145007.jpg");
+    background-size: cover;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.imageVideoCall>img  {
+    height: 23rem;
+    position: absolute;
+    right: 7rem;
+    top: 20vh;
+}
+
+
+.LandingPageText {
+    width: 40%;
+    margin-left: 7rem;
+}
+
+.LandingPageText >h1{
+    color: white;
+    line-height: 4rem;
+    margin-top: 6rem;
+    font-size: 3rem;
+}
+
+.LandingPageText >p{
+    color: rgba(255, 255, 255, 0.821);
+    letter-spacing: 5px;
+    margin-top: 1rem;
+}   
+
+
+.LandingPageText>button {
+    background-color: rgb(255, 119, 0);
+    font-size: 1rem;
+    color: white;
+    height: 2.5rem;
+    width: 9rem;
+    padding: 0px;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+}
+

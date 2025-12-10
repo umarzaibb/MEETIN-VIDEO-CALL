@@ -1,0 +1,63 @@
+* {
+    color: white;
+    overflow: hidden;
+}
+
+.Body {
+    background-color: hsl(231, 81%, 25%);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.Body> .toast {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid red;
+    margin-top: 2rem;
+}
+
+.toast-body {
+    color: black;
+}
+
+.toastCloseBtn {
+    color: black;
+    background-color: rebeccapurple !important;
+    height: 1rem;
+}
+
+.signup-form {
+    height: 100vh;
+    width: 50%;
+    margin: auto;
+    padding:8% 10%;
+    margin-top: -2.5rem;
+}
+
+#signup-heading {
+    text-align: center;
+    margin-bottom: 64px;
+    font-size: 3rem;
+}
+
+#passwordHelpBlock {
+    color: white !important;
+    margin-top: 8px;
+}
+
+#submit-btn {
+  margin-top: 16px;
+  width: 30vw !important;
+}
+
+#toastCloseBtn {
+    color: black;
+    border: none;
+    background-color: white;
+    width: 20%;
+    font-weight: bolder;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
