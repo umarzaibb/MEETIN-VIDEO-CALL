@@ -2,15 +2,22 @@ const express= require('express');
 const connectDB=require('./utils/connectDB.js');
 const authenticationRoute= require('../backend/Routes/authenticationRoutes.js');
 const cors= require('cors');
+const cookieParser= require('cookie-parser');
 
 
+const corsOptions = {
+  origin: 'http://localhost:5173',  // Allow only this origin
+  credentials: true,                // Allow cookies and other credentials
+};
 const app=express();
 let port=8000;
 
 //middlewares
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors(corsOptions));
+
 app.use("/", authenticationRoute);
 
 app.listen(port, ()=>{
