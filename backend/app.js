@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
-app.use("/", authenticationRoute);
+app.use("/user", authenticationRoute);
 
 app.listen(port, ()=>{
     console.log('----- Listening on port 8000 -----');

@@ -12,9 +12,6 @@ router.post('/login',(req,res)=> wrapAsync(req,res,Authentication.Login) );
 
 router.get('/get_access_token',(req,res)=> wrapAsync(req,res,Authentication.getAccessToken) );
 
-router.post('/meeting',verifyUser,(req,res)=> wrapAsync(req,res,(req,res)=>{
-    res.send('okayyyyyy');
-}) );
-
+router.delete('/logout',(req,res)=> wrapAsync(req,res,Authentication.Logout) );
 
 module.exports= router;

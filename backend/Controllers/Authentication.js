@@ -157,4 +157,39 @@ async function getAccessToken(req, res) {
   }
 }
 
-module.exports = { Signup, Login, getAccessToken };
+async function Logout(req,res) {
+  let {refresh_token}= req.cookies;
+
+  if(!refresh_token) {
+     return res.status(httpStatus.BAD_REQUEST).json(
+      {
+        'message': 'You are already logged out'
+      }
+     );
+  }
+
+  let user=await User.findOne({token: refresh_token});
+  if(!user) {
+     return res.status(httpStatus.BAD_REQUEST).json(
+      {
+        'message': 'User never logged in!'
+      }
+     );
+  }
+
+  user.token=null;
+  user.token_validation=null;
+
+  await user.save();
+
+  res.clearCookie('refresh_token');
+
+  return res.status(httpStatus.ACCEPTED).json(
+    {
+      'message': 'Successfully logged out!'
+    }
+  );
+
+}
+
+module.exports = { Signup, Login, getAccessToken, Logout };

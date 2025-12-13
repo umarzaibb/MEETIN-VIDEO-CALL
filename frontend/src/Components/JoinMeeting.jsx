@@ -1,8 +1,23 @@
 import React from 'react';
 import './JoinMeeting.css';
+import axios, { HttpStatusCode } from 'axios';
+import { useNavigate } from 'react-router';
 
 export default function Meeting() {
 
+  let navigate= useNavigate();
+
+ function Logout() {
+  axios.delete('http://localhost:8000/user/logout', {withCredentials: true}).then((response)=>{
+    console.log(response.status);
+    if(response.status===HttpStatusCode.Accepted){
+      localStorage.removeItem('username');
+      navigate("/");
+    }
+  }).catch((e)=>{
+     console.log(e.message);
+  })
+ }
     return (
    <>
       <div className="join-meeting-div">
@@ -10,7 +25,7 @@ export default function Meeting() {
           <h1>Apna Video Call</h1>
           <span>
             <span className="nav-user">
-              <a >Logout</a>
+              <a onClick={Logout}>Logout</a>
               <p id="username"></p>
               <i className="fa-solid fa-circle-user"></i>
               <p className="username-nav">{localStorage.getItem("username")}</p>

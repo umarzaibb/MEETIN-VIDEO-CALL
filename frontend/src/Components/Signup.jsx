@@ -20,7 +20,7 @@ export default function Signup() {
 
     function onSubmit(event) {
       event.preventDefault();
-      axios.post('http://localhost:8000/signup', formValues)
+      axios.post('http://localhost:8000/user/signup', formValues)
       .then((response)=>{
        set_toast_msg(response.data.message + " Please log in to continue.");
        setShowToast(true);

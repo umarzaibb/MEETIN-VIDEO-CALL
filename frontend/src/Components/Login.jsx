@@ -20,7 +20,7 @@ export default function Login() {
   function onSubmit(event) {
     event.preventDefault();
     axios
-      .post("http://localhost:8000/login", formValues , {withCredentials:true})
+      .post("http://localhost:8000/user/login", formValues , {withCredentials:true})
       .then((response) => {
         localStorage.setItem('username', formValues.username);
         set_toast_msg(response.data.message);

@@ -10,14 +10,14 @@ export default function AuthProvider({ children }) {
   // Fetch access token on component mount
   useEffect(() => {
     axios
-      .get(`${baseUrl}/get_access_token`, { withCredentials: true })
+      .get(`${baseUrl}/user/get_access_token`, { withCredentials: true })
       .then((response) => {
         if (response.status === 202) { // HttpStatusCode.Accepted => 202
           setToken(response.data.access_token);
         }
       })
       .catch((e) => {
-        if (e.response && e.response.status === 401) { // HttpStatusCode.Unauthorized => 401
+        if (e.response || e.response.status === 401) { // HttpStatusCode.Unauthorized => 401
           navigate('/login');
         } else {
           alert(e.message);
