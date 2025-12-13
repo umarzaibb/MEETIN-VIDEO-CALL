@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "./Login.css";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 export default function Login() {
+  let navigate=useNavigate();
   let [formValues, setFormValues] = useState({
     username: "",
     password: "",
@@ -18,10 +20,13 @@ export default function Login() {
   function onSubmit(event) {
     event.preventDefault();
     axios
-      .post("http://localhost:8000/login", formValues)
+      .post("http://localhost:8000/login", formValues , {withCredentials:true})
       .then((response) => {
+        localStorage.setItem('username', formValues.username);
         set_toast_msg(response.data.message);
         setShowToast(true);
+        navigate('/meeting');
+        
         // axios.interceptors.request.use(
         //   (config) => {
         //     if (token) {
