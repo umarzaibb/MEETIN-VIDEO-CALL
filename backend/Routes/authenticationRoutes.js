@@ -1,7 +1,6 @@
 const express= require('express');
 const Authentication= require('../Controllers/Authentication.js');
 const wrapAsync= require('../utils/wrapAsync.js');
-const { default: verifyAccessToken } = require('../Middlewares/verifyAccessToken.js');
 const verifyUser=require('../Middlewares/verifyAccessToken.js');
 
 let router= express.Router();
@@ -12,6 +11,6 @@ router.post('/login',(req,res)=> wrapAsync(req,res,Authentication.Login) );
 
 router.get('/get_access_token',(req,res)=> wrapAsync(req,res,Authentication.getAccessToken) );
 
-router.delete('/logout',(req,res)=> wrapAsync(req,res,Authentication.Logout) );
+router.delete('/logout',verifyUser,(req,res)=> wrapAsync(req,res,Authentication.Logout) );
 
 module.exports= router;
