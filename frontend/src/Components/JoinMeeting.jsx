@@ -34,6 +34,16 @@ export default function Meeting() {
    })
  }
 
+ function onJoiningMeeting () {
+   axios.post('http://localhost:8000/is-meeting-available', {meetingID}).then((response)=>{
+      if(response.status== HttpStatusCode.Accepted) {
+         navigate('/meeting'+'/'+meetingID);
+      }
+   }).catch(e=>{
+     alert(e.message);
+   })
+ }
+
     return (
    <>
       <div className="join-meeting-div">
@@ -72,7 +82,7 @@ export default function Meeting() {
             <button onClick={onCreateMeeting}  className="btn btn-dark me-3">
               Create
             </button>
-            <button className="btn btn-primary" >
+            <button className="btn btn-primary" onClick={onJoiningMeeting} >
               Join
             </button>
           </form>

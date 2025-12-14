@@ -47,4 +47,27 @@ async function RegisterMeeting(req,res) {
     })
 }
 
-module.exports= {RegisterMeeting};
+async function IsMeetingAvailable( req, res ) {
+  
+   let {meetingID}= req.body; 
+
+    if(!meetingID) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+          'message': 'Meeting ID is required!'
+        });
+    }
+
+    let meeting=await Meeting.findOne({meetingID});
+     if(!meeting) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+          'message': 'Meeting room is not created. Please try valid meeting ID'
+        });
+    }
+
+    return res.status(httpStatus.ACCEPTED).json({
+          'message': 'Successfully enterred meeting room. Enjoy!'
+        });
+
+}
+
+module.exports= {RegisterMeeting, IsMeetingAvailable};

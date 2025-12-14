@@ -6,5 +6,6 @@ const Meetings= require('../Controllers/MeetingHandler.js');
 let router= express.Router();
 
 router.post('/meeting',verifyUser,(req,res)=> wrapAsync(req,res,Meetings.RegisterMeeting) );
+router.post('/is-meeting-available',verifyUser,(req,res)=> wrapAsync(req,res,Meetings.IsMeetingAvailable) );
 
 module.exports= router;
