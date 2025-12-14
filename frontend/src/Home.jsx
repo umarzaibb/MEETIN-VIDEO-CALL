@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Home.css';
 import { useNavigate } from 'react-router';
 
 export default function Home() {
   let navigate= useNavigate();
+  let username=localStorage.getItem('username');
+
+
   return (
     <>
       <div className="LandingPageDiv">
@@ -37,7 +40,7 @@ export default function Home() {
                     Join as Guest
                   </a>
                 </li>
-                <button
+                {!username?<><button
                   class="btn btn-outline-primary me-3"
                   type="submit"
                   onClick={()=>navigate('/login')}
@@ -48,7 +51,9 @@ export default function Home() {
                   <a class="nav-link me-4" href="/signup">
                     Signup
                   </a>
-                </li>
+                </li></>: <a class="nav-link me-4" href="/meeting">
+                   Create / Join Meeting
+                  </a>}
               </ul>
             </div>
           </div>

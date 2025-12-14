@@ -1,0 +1,31 @@
+.mainDiv {
+    background-color:  rgb(42, 38, 38);
+    width: 100vw;
+    height: 100vh;
+}
+
+.controllers {
+    background-color: rgb(42, 38, 38);
+    position: fixed;
+    bottom: 0px;
+    width: 100vw;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 3px solid rgb(99, 97, 97);
+}
+
+.controllers> i {
+    color: whitesmoke;
+    font-size: 1.5rem;
+    margin-left: 1.05rem;
+    margin-right: 1.05rem;
+}
+
+.msgBoxDiv {
+    position: fixed;
+    right: 5px;
+    top: -6px;
+}
+

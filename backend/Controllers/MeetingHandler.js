@@ -35,6 +35,14 @@ async function RegisterMeeting(req,res) {
         });
     }
 
+    let isMeetingAlreadyCreated= await Meeting.findOne({meetingID});
+   if(isMeetingAlreadyCreated) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+          'message': 'Meeting Already exist.'
+        });
+    }
+
+
     let my_meeting= new Meeting({meetingID, start_time: new Date(), admin });
     await my_meeting.save().then(()=>{
         return res.status(httpStatus.CREATED).json({

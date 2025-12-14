@@ -35,13 +35,8 @@ export default function Meeting() {
  }
 
  function onJoiningMeeting () {
-   axios.post('http://localhost:8000/is-meeting-available', {meetingID}).then((response)=>{
-      if(response.status== HttpStatusCode.Accepted) {
+   
          navigate('/meeting'+'/'+meetingID);
-      }
-   }).catch(e=>{
-     alert(e.message);
-   })
  }
 
     return (
