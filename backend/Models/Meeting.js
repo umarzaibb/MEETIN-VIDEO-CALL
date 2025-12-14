@@ -3,15 +3,17 @@ const mongoose= require('mongoose');
 let meetingSchema= new mongoose.Schema({
    meetingID: {
     type: String,
-    required: true
+    required: true,
+    unique: true
    },
 
    admin : {
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
    },
 
-   s_time: {
+   start_time: {
     type: Date,
     required: true
    }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './JoinMeeting.css';
 import axios, { HttpStatusCode } from 'axios';
 import { useNavigate } from 'react-router';
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router';
 export default function Meeting() {
 
   let navigate= useNavigate();
+  let [meetingID, setMeetingID]= useState();
 
  function Logout() {
   axios.delete('http://localhost:8000/user/logout', {withCredentials: true}).then((response)=>{
@@ -18,6 +19,21 @@ export default function Meeting() {
      console.log(e.message);
   })
  }
+
+ function onChangeMeetingID(event) {
+      setMeetingID(event.target.value);
+ }
+
+ function onCreateMeeting() {
+   axios.post('http://localhost:8000/meeting', {meetingID}).then((response)=>{
+      if(response.status== HttpStatusCode.Created) {
+         navigate('/meeting'+'/'+meetingID);
+      }
+   }).catch(e=>{
+     alert(e.message);
+   })
+ }
+
     return (
    <>
       <div className="join-meeting-div">
@@ -42,6 +58,8 @@ export default function Meeting() {
                 Meeting ID
               </label>
               <input
+                onChange={onChangeMeetingID}
+                value={meetingID}
                 type="text"
                 className="form-control"
                 id="exampleInputEmail1"
@@ -51,7 +69,7 @@ export default function Meeting() {
                 Share this meeting id with others to join!
               </div>
             </div>
-            <button  className="btn btn-dark me-3">
+            <button onClick={onCreateMeeting}  className="btn btn-dark me-3">
               Create
             </button>
             <button className="btn btn-primary" >
