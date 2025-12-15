@@ -15,7 +15,6 @@ export default function AuthProvider({ children }) {
       .get(`${baseUrl}/user/get_access_token`, { withCredentials: true })
       .then((response) => {
         if (response.status === 202) { // HttpStatusCode.Accepted => 202
-          console.log(response.data.access_token);
           setToken(response.data.access_token);
         }
       })
@@ -37,7 +36,6 @@ export default function AuthProvider({ children }) {
       (config) => {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
-          console.log("token set");
         }
         return config;
       },

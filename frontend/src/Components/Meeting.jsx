@@ -19,7 +19,6 @@ export default function Meeting() {
   useLayoutEffect(()=>{
 
     let meetingID=location.pathname.split('/')[2];
-    console.log(meetingID);
 
     axios.post('http://localhost:8000/is-meeting-available', {meetingID}).then((response)=>{
       if(response.status== HttpStatusCode.Accepted) {
@@ -47,7 +46,7 @@ export default function Meeting() {
 
   return (
     <div className='mainDiv'>
-    <VideoCall camera={camera} microphone={microphone}></VideoCall>
+    <VideoCall props= {{camera, setCamera, microphone, setMicrophone, screenSharing, setScreenShare}}></VideoCall>
 
       <div className='controllers'>
         {camera? <i className="fa-solid fa-camera" onClick={()=>setCamera(false)}></i>: <i style={{color: 'gray'}} className="fa-solid fa-camera" onClick={()=>setCamera(true)}></i>}
@@ -58,7 +57,7 @@ export default function Meeting() {
 
         {microphone?<i className="fa-solid fa-microphone-lines" onClick={()=>setMicrophone(false)}></i>:
         <i className="fa-solid fa-microphone-lines-slash" onClick={()=>setMicrophone(true)}></i> }
-        {screenSharing?<i className="fa-solid fa-desktop" onClick={()=>setScreenShare(false)}></i>: <i style={{color: 'gray'}} className="fa-solid fa-desktop" onClick={()=>setScreenShare(true)}></i>}
+        {screenSharing?<i className="fa-solid fa-desktop" onClick={()=>{setScreenShare(false); setCamera(false)}}></i>: <i style={{color: 'gray'}} className="fa-solid fa-desktop" onClick={()=>setScreenShare(true)}></i>}
         {msgBox? <i className="fa-solid fa-message" onClick={()=>setMsgBox(false)}></i>: <i style={{color: 'gray'}} className="fa-solid fa-message" onClick={()=>setMsgBox(true)}></i>}
       </div>
     </div>

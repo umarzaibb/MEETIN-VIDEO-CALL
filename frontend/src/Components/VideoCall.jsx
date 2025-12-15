@@ -1,7 +1,47 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import "./VideoCall.css";
+import { useNavigate } from "react-router";
 
-export default function VideoCall({ camera, microphone }) {
+export default function VideoCall({props}) {
+
+  let videoRef= useRef();
+  let navigate= useNavigate();
+
+
+ async function getUserPermission() {
+      try {
+        let UserCamera= await navigator.mediaDevices.getUserMedia({'video': true});
+        if(UserCamera) {
+         props.setCamera(true);
+        }
+
+        let UserAudio= await navigator.mediaDevices.getUserMedia({'audio': true});
+        if(UserAudio) {
+          props.setMicrophone(true);
+        }
+
+        if(UserCamera && UserCamera && !props.screenSharing) {
+          let UserVideoCall= await navigator.mediaDevices.getUserMedia({'audio': props.microphone, 'video': props.camera});
+
+
+          if(videoRef.current) {
+            videoRef.current.srcObject= UserVideoCall;
+          }
+        }
+       
+
+
+      } catch (error) {
+        console.log(error.message);
+        navigate('/meeting');
+      }
+  }
+
+
+  useEffect(()=>{
+    getUserPermission();
+  },[]);
+
   return (
     <>
       <div className="video-container">
@@ -52,10 +92,10 @@ export default function VideoCall({ camera, microphone }) {
           </div>
         </div>
 
-        {camera ? (
+        {props.camera ? (
           <div className="video-call-box">
             {/* Insert your video stream element here */}
-            <video id="video" autoPlay></video>
+            <video ref={videoRef} id="video" playsInline autoPlay></video>
           </div>
         ) : (
           <div className="camera-off-box">
