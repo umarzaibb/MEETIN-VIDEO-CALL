@@ -6,11 +6,10 @@ import { useNavigate } from 'react-router';
 export default function Meeting() {
 
   let navigate= useNavigate();
-  let [meetingID, setMeetingID]= useState();
+  let [meetingID, setMeetingID]= useState("");
 
  function Logout() {
   axios.delete('http://localhost:8000/user/logout', {withCredentials: true}).then((response)=>{
-    console.log(response.status);
     if(response.status===HttpStatusCode.Accepted){
       localStorage.removeItem('username');
       navigate("/");

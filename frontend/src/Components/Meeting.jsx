@@ -1,65 +1,199 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {io} from 'socket.io-client';
-import { useLocation, useNavigate } from 'react-router';
-import './Meeting.css';
-import axios, { HttpStatusCode } from 'axios';
-import VideoCall from './VideoCall.jsx';
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { io } from "socket.io-client";
+import { useLocation, useNavigate } from "react-router";
+import "./Meeting.css";
+import axios, { HttpStatusCode } from "axios";
+import VideoCall from "./VideoCall.jsx";
+import Controls from "./Controls.jsx";
+
+const configuration = {
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+};
+let meetingID;
 
 export default function Meeting() {
+  let socketRef = useRef();
+  let navigate = useNavigate();
+  let [connectedUser, setConnectedUser] = useState({});
+  let connectionRef = useRef({}); //{forID: connection}
+  let queueICE = useRef({});
 
-  let [microphone, setMicrophone]= useState(true);
-  let [camera, setCamera]= useState(true);
-  let [screenSharing, setScreenShare]= useState(false);
-  let [msgBox, setMsgBox]= useState(true);
-
-  let socket= useRef();
-  let navigate= useNavigate();
-  let location= useLocation();
-
-  useLayoutEffect(()=>{
-
-    let meetingID=location.pathname.split('/')[2];
-
-    axios.post('http://localhost:8000/is-meeting-available', {meetingID}).then((response)=>{
-      if(response.status== HttpStatusCode.Accepted) {
-        console.log(response);
+  function setConfigurationWEBRTC(pc, targetID) {
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socketRef.current.emit("signal-ice-candidate", {
+          ice: event.candidate,
+          senderID: socketRef.current.id,
+          receiverID: targetID,
+        });
       }
-   }).catch(e=>{
-     alert(e.message);
-     navigate('/meeting');
-   })
+    };
 
-  socket.current= io('http://localhost:3000', {
-    withCredentials: true
-  });
-
-  return ()=>{
-    socket.current.disconnect();
+    pc.addEventListener("connectionstatechange", (event) => {
+      if (pc.connectionState === "connected") {
+        console.log("Webrtc connection created successfully....");
+      }
+    });
   }
 
-  },[]);
+  let createWebRTC_OFFER = async (USERS) => {
+    let keysArray = Object.keys(USERS);
+    if (keysArray.length <= 1) {
+      return;
+    }
 
-  function LeaveMeeting () {
-     socket.current.disconnect();
-     navigate('/meeting');
+    let lastUserID = keysArray[keysArray.length - 1];
+
+    if (lastUserID === socketRef.current.id) {
+      for (let i = 0; i < keysArray.length - 1; i++) {
+        let targetID = keysArray[i];
+
+        let condition =
+           targetID != socketRef.current.id &&
+          !connectionRef.current[targetID];
+
+        if (condition) {
+          let pc = new RTCPeerConnection(configuration);
+           setConfigurationWEBRTC(pc, targetID);
+            let dc = pc.createDataChannel("my-data-channel");
+
+          dc.onopen = (event) => {
+            console.log("Data channel successfully created...");
+          };
+
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          socketRef.current.emit("signal-offer", {
+            offer,
+            senderID: socketRef.current.id,
+            receiverID: targetID,
+          });
+
+          connectionRef.current[targetID] = pc;
+          console.log(
+            "PEER_CONNECTION = ",
+            connectionRef.current[targetID]
+          );
+        }
+      }
+    }
+  };
+
+  useLayoutEffect(() => {
+    meetingID = location.pathname.split("/")[2];
+
+    axios
+      .post("http://localhost:8000/is-meeting-available", { meetingID })
+      .then((response) => {
+        if (response.status != HttpStatusCode.Accepted) {
+          navigate("/meeting");
+        }
+      })
+      .catch((e) => {
+        alert(e.message);
+        navigate("/meeting");
+      });
+
+    socketRef.current = io("http://localhost:3000", {
+      withCredentials: true,
+    });
+
+    socketRef.current.emit("join-meeting", {
+      meetingID,
+      username: localStorage.getItem("username"),
+    });
+
+    socketRef.current.on("get-connected-users", ({ allUsers }) => {
+      createWebRTC_OFFER(allUsers);
+      setConnectedUser({ ...allUsers });
+    });
+
+    socketRef.current.on("signal-ice-candidate", async ({ ice, senderID }) => {
+      let pc=connectionRef.current[senderID];
+      if (ice && pc) {
+        if (!pc.remoteDescription) {
+          queueICE.current[senderID].push(ice);
+        } else {
+          if (
+            queueICE.current[senderID] &&
+            queueICE.current[senderID].length > 0
+          ) {
+            console.log(
+              "📦 Processing",
+              queueICE.current[senderID].length,
+              "queued ICE candidates for",
+              senderID
+            );
+            for (let candidate of queueICE.current[senderID]) {
+              try {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+              } catch (e) {
+                console.error("❌ Error adding queued ICE candidate:", e);
+              }
+            }
+          }
+
+          try {
+            await connectionRef.current[senderID].addIceCandidate(ice);
+          } catch (e) {
+            console.error("Error adding received ice candidate", e);
+          }
+        }
+      }
+    });
+
+    socketRef.current.on("signal-offer", async ({ offer, senderID }) => {
+      if (offer && senderID) {
+        let pc = new RTCPeerConnection(configuration);
+        console.log(offer);
+        setConfigurationWEBRTC(pc, senderID);
+        pc.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        if (!connectionRef.current[senderID]) {
+          connectionRef.current[senderID] = pc;
+        }
+
+        console.log("ans_pc = ", pc);
+        socketRef.current.emit("signal-answer", {
+          answer,
+          senderID: socketRef.current.id,
+          receiverID: senderID,
+        });
+      }
+    });
+
+    socketRef.current.on("signal-answer", async ({ answer, senderID }) => {
+      if (answer && senderID && connectionRef.current[senderID]) {
+        const remoteDesc = new RTCSessionDescription(answer);
+        await connectionRef.current[senderID].setRemoteDescription(remoteDesc);
+        console.log(connectionRef.current[senderID]);
+      }
+    });
+
+    return () => {
+      socketRef.current.disconnect();
+      delete connectionRef.current;
+    };
+  }, []);
+
+  function LeaveMeeting() {
+    socket.current.disconnect();
+    navigate("/meeting");
   }
 
   return (
-    <div className='mainDiv'>
-    <VideoCall props= {{camera, setCamera, microphone, setMicrophone, screenSharing, setScreenShare}}></VideoCall>
-
-      <div className='controllers'>
-        {camera? <i className="fa-solid fa-camera" onClick={()=>setCamera(false)}></i>: <i style={{color: 'gray'}} className="fa-solid fa-camera" onClick={()=>setCamera(true)}></i>}
-
-
-        <i className="fa-solid fa-phone-slash" onClick={LeaveMeeting} style={{color: "red"}} ></i>
-
-
-        {microphone?<i className="fa-solid fa-microphone-lines" onClick={()=>setMicrophone(false)}></i>:
-        <i className="fa-solid fa-microphone-lines-slash" onClick={()=>setMicrophone(true)}></i> }
-        {screenSharing?<i className="fa-solid fa-desktop" onClick={()=>{setScreenShare(false); setCamera(false)}}></i>: <i style={{color: 'gray'}} className="fa-solid fa-desktop" onClick={()=>setScreenShare(true)}></i>}
-        {msgBox? <i className="fa-solid fa-message" onClick={()=>setMsgBox(false)}></i>: <i style={{color: 'gray'}} className="fa-solid fa-message" onClick={()=>setMsgBox(true)}></i>}
-      </div>
+    <div className="mainDiv">
+      <button
+        onClick={() => {
+          console.log(connectionRef.current);
+        }}
+      >
+        GET CONNECTION
+      </button>
+      <VideoCall></VideoCall>
+      <Controls></Controls>
     </div>
-  )
+  );
 }
