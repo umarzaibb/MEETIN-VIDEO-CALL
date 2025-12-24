@@ -238,7 +238,15 @@ export default function Meeting() {
   return (
     <div className="mainDiv">
       <VideoCall></VideoCall>
-      <Controls></Controls>
+      <Controls
+  audio={audio}
+  video={video}
+  screenShare={screenShare}
+  setAudio={setAudio}
+  setVideo={setVideo}
+  setScreenShare={setScreenShare}
+/>
+
     </div>
   );
 }

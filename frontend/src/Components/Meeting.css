@@ -4,7 +4,7 @@
     height: 100vh;
 }
 
-.controllers {
+/* .controllers {
     background-color: rgb(42, 38, 38);
     position: fixed;
     bottom: 0px;
@@ -21,11 +21,87 @@
     font-size: 1.5rem;
     margin-left: 1.05rem;
     margin-right: 1.05rem;
-}
+} */
 
 .msgBoxDiv {
     position: fixed;
     right: 5px;
     top: -6px;
+}
+
+.controllers {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 40px;
+}
+
+.control-item {
+  position: relative;
+}
+
+.control-item i {
+  font-size: 1.5rem;
+  padding: 14px;
+  border-radius: 50%;
+  background: #1e1e1e;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 1.05rem;
+  margin-right: 1.05rem;
+}
+
+/* Hover */
+.control-item i:hover {
+  transform: scale(1.15);
+}
+
+.control-item i.off {
+  color: red;
+}
+
+.control-item i.active {
+  color: #0a84ff;
+}
+
+
+/* End call */
+.control-item.end i {
+  background: red;
+  color: white;
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: black;
+  color: white;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.3s;
+  white-space: nowrap;
+}
+
+.control-item:hover .tooltip {
+  opacity: 1;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(10, 132, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(10, 132, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(10, 132, 255, 0);
+  }
 }
 
