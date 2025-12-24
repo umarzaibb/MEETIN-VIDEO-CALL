@@ -13,7 +13,12 @@ export default function VideoCall() {
           <div className="participants-video-boxes-container">
             {/* Other participants */}
             <div className="participant-video-box">
-              <video id="participant-video" autoPlay muted></video>
+             <div className={`audio-wave ${true ? "active" : ""}`}>
+      {[...Array(5)].map((_, i) => (
+        <span key={i}></span>
+      ))}
+    </div>
+              {/* <video id="participant-video" autoPlay muted></video> */}
             </div>
             <div className="participant-video-box">
               <video id="participant-video" autoPlay muted></video>
@@ -46,10 +51,16 @@ export default function VideoCall() {
        
           <div className="camera-off-box">
             {/* Font Awesome Icon for User */}
-            <i
+            {/* <i
               className="fa-solid fa-user-circle"
               style={{ fontSize: "4rem", color: "#4CAF50" }}
-            ></i>
+            ></i> */}
+
+              <div className={`audio-wave ${true ? "active" : ""}`}>
+      {[...Array(5)].map((_, i) => (
+        <span key={i}></span>
+      ))}
+    </div>
 
             {/* Username */}
             <p className="username">Username</p>

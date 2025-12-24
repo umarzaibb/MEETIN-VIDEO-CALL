@@ -17,6 +17,54 @@ export default function Meeting() {
   let [connectedUser, setConnectedUser] = useState({});
   let connectionRef = useRef({}); //{forID: connection}
   let queueICE = useRef({});
+  let [audio, setAudio]= useState(false);
+  let [video, setVideo] = useState(false);
+  let [screenShare, setScreenShare]= useState(false);
+  let localStream= useRef();
+
+  async function getUserMedia() {
+    if(audio && video) {
+      navigator.mediaDevices.getUserMedia(
+        {'audio': audio,
+         'video' : video
+        }
+      ).then((res)=>{
+        localStream.current=res;
+      }).catch((err)=>{
+        setAudio(false);
+        setVideo(false);
+      });
+    }
+
+    else if(audio) {
+     navigator.mediaDevices.getUserMedia(
+        {'audio': audio}
+      ).then((res)=>{
+        localStream.current=res;
+      }).catch((err)=>{
+        setAudio(false);
+      });
+    }
+
+    else if(video) {
+     navigator.mediaDevices.getUserMedia(
+        {'video' : video}
+      ).then((res)=>{
+        localStream.current=res;
+      }).catch((err)=>{
+        setVideo(false);
+      });
+    }
+
+    else if(screenShare) {
+      navigator.mediaDevices.getDisplayMedia( )
+      .then((res)=>{
+        localStream.current=res;
+      }).catch((err)=>{
+        setScreenShare(false);
+      });
+    }
+  }
 
   function setConfigurationWEBRTC(pc, targetID) {
     pc.onicecandidate = (event) => {
@@ -78,6 +126,10 @@ export default function Meeting() {
       }
     }
   };
+
+  useEffect(()=>{
+    getUserMedia();
+  }, [video, audio, screenShare]);
 
   useLayoutEffect(() => {
     meetingID = location.pathname.split("/")[2];
@@ -185,13 +237,6 @@ export default function Meeting() {
 
   return (
     <div className="mainDiv">
-      <button
-        onClick={() => {
-          console.log(connectionRef.current);
-        }}
-      >
-        GET CONNECTION
-      </button>
       <VideoCall></VideoCall>
       <Controls></Controls>
     </div>
