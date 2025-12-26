@@ -21,6 +21,7 @@ export default function Meeting() {
   let [video, setVideo] = useState(true);
   let [screenShare, setScreenShare] = useState(false);
   let localStream = useRef();
+  let remoteStreams= useRef([]);
 
 
   async function getUserMedia() {
@@ -77,6 +78,7 @@ function setConfigurationWEBRTC(pc, targetID) {
 
     pc.ontrack= (event)=>{
       console.log('track added');
+      remoteStreams.current.push(event.streams);
     }
 
     pc.addEventListener("connectionstatechange", (event) => {
@@ -207,6 +209,11 @@ function setConfigurationWEBRTC(pc, targetID) {
     socketRef.current.on("signal-offer", async ({ offer, senderID }) => {
       if (offer && senderID) {
         let pc = new RTCPeerConnection(configuration);
+        getUserMedia().then(async()=>{
+           localStream.current.srcObject.getTracks().forEach(track => {
+    pc.addTrack(track, localStream.current.srcObject);
+});
+        
         setConfigurationWEBRTC(pc, senderID);
         pc.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await pc.createAnswer();
@@ -222,7 +229,9 @@ function setConfigurationWEBRTC(pc, targetID) {
           senderID: socketRef.current.id,
           receiverID: senderID,
         });
+        })
       }
+
     });
 
     socketRef.current.on("signal-answer", async ({ answer, senderID }) => {
@@ -241,7 +250,12 @@ function setConfigurationWEBRTC(pc, targetID) {
 
   return (
     <div className="mainDiv">
-      <VideoCall   localStream={localStream}></VideoCall>
+      <VideoCall
+       remoteStreams={remoteStreams}
+       localStream={localStream}
+       ></VideoCall>
+
+       
       <Controls
         audio={audio}
         video={video}
