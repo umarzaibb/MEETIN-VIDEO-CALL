@@ -17,56 +17,54 @@ export default function Meeting() {
   let [connectedUser, setConnectedUser] = useState({});
   let connectionRef = useRef({}); //{forID: connection}
   let queueICE = useRef({});
-  let [audio, setAudio]= useState(false);
-  let [video, setVideo] = useState(false);
-  let [screenShare, setScreenShare]= useState(false);
-  let localStream= useRef();
+  let [audio, setAudio] = useState(true);
+  let [video, setVideo] = useState(true);
+  let [screenShare, setScreenShare] = useState(false);
+  let localStream = useRef();
+
 
   async function getUserMedia() {
-    if(audio && video) {
-      navigator.mediaDevices.getUserMedia(
-        {'audio': audio,
-         'video' : video
-        }
-      ).then((res)=>{
-        localStream.current=res;
-      }).catch((err)=>{
-        setAudio(false);
-        setVideo(false);
+    let stream;
+     try {
+    if (audio && video) {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: audio,
+        video: video,
       });
+    } 
+    else if (audio) {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: audio,
+      });
+    } 
+    else if (video) {
+       stream = await navigator.mediaDevices.getUserMedia({
+        video: video,
+      });
+    } 
+    else if (screenShare) {
+      stream = await navigator.mediaDevices.getDisplayMedia();
     }
-
-    else if(audio) {
-     navigator.mediaDevices.getUserMedia(
-        {'audio': audio}
-      ).then((res)=>{
-        localStream.current=res;
-      }).catch((err)=>{
-        setAudio(false);
-      });
+    if(stream ) {
+      // console.log("Successfully added stream= ",localStream.current.srcObject=stream);
+         localStream.current.srcObject=stream;
     }
-
-    else if(video) {
-     navigator.mediaDevices.getUserMedia(
-        {'video' : video}
-      ).then((res)=>{
-        localStream.current=res;
-      }).catch((err)=>{
-        setVideo(false);
-      });
-    }
-
-    else if(screenShare) {
-      navigator.mediaDevices.getDisplayMedia( )
-      .then((res)=>{
-        localStream.current=res;
-      }).catch((err)=>{
-        setScreenShare(false);
-      });
+  } catch (err) {
+    if (audio && video) {
+      setAudio(false);
+      setVideo(false);
+    } else if (audio) {
+      setAudio(false);
+    } else if (video) {
+      setVideo(false);
+    } else if (screenShare) {
+      setScreenShare(false);
     }
   }
+    }
 
-  function setConfigurationWEBRTC(pc, targetID) {
+
+function setConfigurationWEBRTC(pc, targetID) {
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         socketRef.current.emit("signal-ice-candidate", {
@@ -76,6 +74,10 @@ export default function Meeting() {
         });
       }
     };
+
+    pc.ontrack= (event)=>{
+      console.log('track added');
+    }
 
     pc.addEventListener("connectionstatechange", (event) => {
       if (pc.connectionState === "connected") {
@@ -103,11 +105,14 @@ export default function Meeting() {
         if (condition) {
           let pc = new RTCPeerConnection(configuration);
            setConfigurationWEBRTC(pc, targetID);
-            let dc = pc.createDataChannel("my-data-channel");
-
-          dc.onopen = (event) => {
-            console.log("Data channel successfully created...");
-          };
+           getUserMedia().then(async()=>{
+            //  let dc = pc.createDataChannel("my-data-channel");
+            localStream.current.srcObject.getTracks().forEach(track => {
+    pc.addTrack(track, localStream.current.srcObject);
+});
+          // dc.onopen = (event) => {
+          //   console.log("Data channel successfully created...");
+          // };
 
           const offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
@@ -122,9 +127,11 @@ export default function Meeting() {
             "PEER_CONNECTION = ",
             connectionRef.current[targetID]
           );
-        }
-      }
-    }
+        
+      
+           });
+           
+          }}}
   };
 
   useEffect(()=>{
@@ -164,6 +171,9 @@ export default function Meeting() {
       let pc=connectionRef.current[senderID];
       if (ice && pc) {
         if (!pc.remoteDescription) {
+          if(!queueICE.current[senderID]) {
+            queueICE.current[senderID]=[];
+          }
           queueICE.current[senderID].push(ice);
         } else {
           if (
@@ -197,7 +207,6 @@ export default function Meeting() {
     socketRef.current.on("signal-offer", async ({ offer, senderID }) => {
       if (offer && senderID) {
         let pc = new RTCPeerConnection(configuration);
-        console.log(offer);
         setConfigurationWEBRTC(pc, senderID);
         pc.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await pc.createAnswer();
@@ -230,23 +239,18 @@ export default function Meeting() {
     };
   }, []);
 
-  function LeaveMeeting() {
-    socket.current.disconnect();
-    navigate("/meeting");
-  }
-
   return (
     <div className="mainDiv">
-      <VideoCall></VideoCall>
+      <VideoCall   localStream={localStream}></VideoCall>
       <Controls
-  audio={audio}
-  video={video}
-  screenShare={screenShare}
-  setAudio={setAudio}
-  setVideo={setVideo}
-  setScreenShare={setScreenShare}
-/>
-
+        audio={audio}
+        video={video}
+        screenShare={screenShare}
+        setAudio={setAudio}
+        setVideo={setVideo}
+        setScreenShare={setScreenShare}
+      />
+    
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import "./VideoCall.css";
 
-export default function VideoCall() {
+export default function VideoCall({localStream}) {
 
 
   return (
@@ -43,11 +43,11 @@ export default function VideoCall() {
         </div>
 
         
-        {/*  <div className="video-call-box">
-            {/* Insert your video stream element here 
-            <video id="video" playsInline autoPlay></video>
+         <div className="video-call-box">
+            {/* Insert your video stream element here */} 
+            <video id="video" ref={localStream} playsInline autoPlay></video>
           </div>
-        */}
+       
        
           <div className="camera-off-box">
             {/* Font Awesome Icon for User */}
