@@ -24,7 +24,9 @@ export default function Meeting() {
   let remoteStreams= useRef([]);
 
 
+
   async function getUserMedia() {
+    console.log('again');
     let stream;
      try {
     if (audio && video) {
@@ -81,6 +83,7 @@ function setConfigurationWEBRTC(pc, targetID) {
       remoteStreams.current.push(event.streams);
     }
 
+
     pc.addEventListener("connectionstatechange", (event) => {
       if (pc.connectionState === "connected") {
         console.log("Webrtc connection created successfully....");
@@ -110,7 +113,7 @@ function setConfigurationWEBRTC(pc, targetID) {
            getUserMedia().then(async()=>{
             //  let dc = pc.createDataChannel("my-data-channel");
             localStream.current.srcObject.getTracks().forEach(track => {
-    pc.addTrack(track, localStream.current.srcObject);
+            pc.addTrack(track, localStream.current.srcObject);
 });
           // dc.onopen = (event) => {
           //   console.log("Data channel successfully created...");
@@ -208,7 +211,7 @@ function setConfigurationWEBRTC(pc, targetID) {
         let pc = new RTCPeerConnection(configuration);
         getUserMedia().then(async()=>{
            localStream.current.srcObject.getTracks().forEach(track => {
-    pc.addTrack(track, localStream.current.srcObject);
+           pc.addTrack(track, localStream.current.srcObject);
 });
         
         setConfigurationWEBRTC(pc, senderID);
@@ -241,16 +244,26 @@ function setConfigurationWEBRTC(pc, targetID) {
 
     return () => {
       socketRef.current.disconnect();
-      localStream.current.srcObject?.getTracks().forEach((track)=>{
-             track.stop();
-      })
-      let keys= Object.keys(connectionRef.current);
-      keys?.forEach((e)=>{
-        connectionRef.current[e]?.close();
-      });
-      delete connectionRef.current;
+      // keys?.forEach((i)=>{
+      //   let pc= connectionRef.current[i]?connectionRef.current[i]: null;
+      //   let sender= pc.getSenders();
+      //   sender?.forEach((s)=>{
+      //     console.log('removed');
+      //     console.log(localStream.current.srcObject);
+      //      pc.removeTrack(s);
+      //   })
+      // })
+      handleEndCall();
     };
   }, []);
+
+   let handleEndCall = () => {
+        try {
+            let tracks = localStream.current.srcObject.getTracks()
+            tracks.forEach(track => track.stop())
+        } catch (e) { }
+        window.location.href = "/meeting"
+    }
 
   return (
     <div className="mainDiv">
@@ -260,6 +273,7 @@ function setConfigurationWEBRTC(pc, targetID) {
 
        
       <Controls
+        handleEndCall={handleEndCall}
         audio={audio}
         video={video}
         screenShare={screenShare}

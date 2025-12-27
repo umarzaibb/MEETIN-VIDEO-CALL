@@ -7,8 +7,10 @@ export default function Controls({
   screenShare,
   setAudio,
   setVideo,
-  setScreenShare
+  setScreenShare,
+  handleEndCall
 }) {
+
 
 const toggleAudio = () => {
   if (audio) {
@@ -61,7 +63,7 @@ const toggleScreen = () => {
 
       {/* End Call */}
       <div className="control-item end">
-        <i className="fa-solid fa-phone-slash"></i>
+        <i className="fa-solid fa-phone-slash" onClick={handleEndCall}></i>
         <span className="tooltip">End Call</span>
       </div>
 
