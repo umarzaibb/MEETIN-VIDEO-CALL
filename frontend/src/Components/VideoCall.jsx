@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import "./VideoCall.css";
 
-export default function VideoCall({localStream, remoteStreams}) {
+export default function VideoCall({localStream}) {
 
 
   return (
@@ -20,12 +20,6 @@ export default function VideoCall({localStream, remoteStreams}) {
     </div>
               {/* <video id="participant-video" autoPlay muted></video> */}
             </div>
-
-            {remoteStreams?.forEach((event)=>{
- <div className="participant-video-box">
-              <video src={{event}} id="participant-video" autoPlay muted></video>
-            </div>
-            })}
 
            
             <div className="participant-video-box">

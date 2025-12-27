@@ -136,9 +136,6 @@ function setConfigurationWEBRTC(pc, targetID) {
           }}}
   };
 
-  useEffect(()=>{
-    getUserMedia();
-  }, [video, audio, screenShare]);
 
   useLayoutEffect(() => {
     meetingID = location.pathname.split("/")[2];
@@ -244,6 +241,13 @@ function setConfigurationWEBRTC(pc, targetID) {
 
     return () => {
       socketRef.current.disconnect();
+      localStream.current.srcObject?.getTracks().forEach((track)=>{
+             track.stop();
+      })
+      let keys= Object.keys(connectionRef.current);
+      keys?.forEach((e)=>{
+        connectionRef.current[e]?.close();
+      });
       delete connectionRef.current;
     };
   }, []);
@@ -251,7 +255,6 @@ function setConfigurationWEBRTC(pc, targetID) {
   return (
     <div className="mainDiv">
       <VideoCall
-       remoteStreams={remoteStreams}
        localStream={localStream}
        ></VideoCall>
 
