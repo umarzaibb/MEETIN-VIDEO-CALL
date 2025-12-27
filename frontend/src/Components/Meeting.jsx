@@ -139,6 +139,33 @@ function setConfigurationWEBRTC(pc, targetID) {
           }}}
   };
 
+  useEffect(()=>{
+
+     if(localStream.current.srcObject) {
+        try {
+            let tracks = localStream.current.srcObject.getTracks()
+            tracks.forEach(track => track.stop())
+        } catch (e) { }
+      getUserMedia().then(()=>{
+           let keys=Object.keys(connectionRef.current);
+           keys.forEach(async(pc)=>{
+           localStream.current.srcObject?.getTracks().forEach(track => {
+           connectionRef.current[pc].addTrack(track, localStream.current.srcObject);
+             });
+             const offer = await connectionRef.current[pc].createOffer();
+          await connectionRef.current[pc].setLocalDescription(offer);
+          socketRef.current.emit("signal-offer", {
+            offer,
+            senderID: socketRef.current.id,
+            receiverID: pc,
+          });
+          })
+        
+      })
+     }
+
+  }, [video, audio, screenShare]);
+
 
   useLayoutEffect(() => {
     meetingID = location.pathname.split("/")[2];
@@ -207,8 +234,14 @@ function setConfigurationWEBRTC(pc, targetID) {
     });
 
     socketRef.current.on("signal-offer", async ({ offer, senderID }) => {
+
       if (offer && senderID) {
-        let pc = new RTCPeerConnection(configuration);
+        let pc ;
+        if(connectionRef.current[senderID]) {
+          pc= connectionRef.current[senderID];
+        }else {
+          pc= new RTCPeerConnection(configuration);
+        }
         getUserMedia().then(async()=>{
            localStream.current.srcObject.getTracks().forEach(track => {
            pc.addTrack(track, localStream.current.srcObject);
