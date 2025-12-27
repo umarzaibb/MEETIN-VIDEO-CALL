@@ -21,7 +21,7 @@ export default function Meeting() {
   let [video, setVideo] = useState(true);
   let [screenShare, setScreenShare] = useState(false);
   let localStream = useRef();
-  let remoteStreams= useRef([]);
+  let remoteStreams= useRef({});
 
 
 
@@ -80,7 +80,13 @@ function setConfigurationWEBRTC(pc, targetID) {
 
     pc.ontrack= (event)=>{
       console.log('track added');
-      remoteStreams.current.push(event.streams);
+      let curr_stream=remoteStreams.current[targetID];
+      if(!curr_stream) {
+         remoteStreams.current[targetID] = new MediaStream();
+         remoteStreams.current[targetID] .addTrack(event.track);
+      }else{
+        curr_stream.addTrack(event.track);
+      }
     }
 
 
@@ -147,10 +153,11 @@ function setConfigurationWEBRTC(pc, targetID) {
             tracks.forEach(track => track.stop())
         } catch (e) { }
       getUserMedia().then(()=>{
+           console.log(localStream.current.srcObject.getTracks());
            let keys=Object.keys(connectionRef.current);
            keys.forEach(async(pc)=>{
            localStream.current.srcObject?.getTracks().forEach(track => {
-           connectionRef.current[pc].addTrack(track, localStream.current.srcObject);
+           connectionRef.current[pc]?.addTrack(track, localStream.current.srcObject);
              });
              const offer = await connectionRef.current[pc].createOffer();
           await connectionRef.current[pc].setLocalDescription(offer);
@@ -290,6 +297,7 @@ function setConfigurationWEBRTC(pc, targetID) {
     };
   }, []);
 
+
    let handleEndCall = () => {
         try {
             let tracks = localStream.current.srcObject.getTracks()
@@ -302,6 +310,7 @@ function setConfigurationWEBRTC(pc, targetID) {
     <div className="mainDiv">
       <VideoCall
        localStream={localStream}
+       remoteStreams= {remoteStreams}
        ></VideoCall>
 
        
